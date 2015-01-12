@@ -1,0 +1,160 @@
+<?php
+
+function intel_instructable_block_info() 
+{
+  $blocks = array();
+  $blocks['instrutableinfo'] = array(
+    'info' => t('intel instructable'),
+  );
+  return $blocks;
+}
+
+function intel_instructable_block_view($delta = '')
+{
+  if($delta == 'instrutableinfo')
+  {
+    $module_path = drupal_get_path('module', 'intel_instructable');
+    $block = array
+    (
+    'subject' => t('Intel Instructable'),
+      'content' => array
+      (
+        '#markup' => _intel_instructable_block_content(),
+        '#attached' => array
+        (
+           'css' => array($module_path.'/css/instructable.css'),
+           'js' => array($module_path.'/css/instructable.js'),
+        ),
+      ),
+    );
+    return $block;
+  }
+}
+
+function intel_instructable_block_configure($delta = '') 
+{
+  $form = array();
+  if ($delta == 'instrutableinfo') {
+    $form['instructable_description'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Description'),
+      '#default_value' => variable_get('instructable_description', ''),
+    );
+    $form['instructable_link_label'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Link (Label)'),
+      '#default_value' => variable_get('instructable_link_label', ''),
+    );
+    $form['instructable_link_value'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Link (Value)'),
+      '#default_value' => variable_get('instructable_link_value', ''),
+    );
+    $form['instructable_cron_interval'] = array(
+      '#type' => 'select',
+      '#title' => t('Instructable cron job interval (In hours)'),
+      '#default_value' => variable_get('instructable_cron_interval', 6),
+      '#options' => drupal_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24)),
+    );
+  }
+  return $form;
+}
+
+function intel_instructable_block_save($delta = '', $edit = array()) 
+{
+  if ($delta == 'instrutableinfo') {
+    variable_set('instructable_description', $edit['instructable_description']);
+    variable_set('instructable_link_label', $edit['instructable_link_label']);
+    variable_set('instructable_link_value', $edit['instructable_link_value']);
+    variable_set('instructable_cron_interval', $edit['instructable_cron_interval']);
+  }
+}
+
+function _intel_instructable_block_content() 
+{
+    $params = array();
+    $instructable_arr = array();
+    
+    $url = 'http://www.instructables.com/json-api/showInstructable?id=intel';
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($curl, CURLOPT_HEADER, false);
+    $data = curl_exec($curl);
+    curl_close($curl);
+    $data = json_decode($data);
+    if(!empty($data)) {
+    $instructable_data = $data->instructables;
+    $instructable_sorted_data = sort_arr_of_obj($instructable_data, 'favorites', 'desc');
+    foreach($instructable_sorted_data as $key => $value) {
+        if($key === 20) 
+        {
+            break;
+        }
+        $instructable_arr[$key]['title'] = $value->title;
+        $instructable_arr[$key]['author_screenname'] = $value->author->screenName;
+        $instructable_arr[$key]['cover_image_squareUrl'] = $value->coverImage->squareUrl;
+        $instructable_arr[$key]['cover_image_square2Url'] = $value->coverImage->square2Url;
+        $instructable_arr[$key]['cover_image_square3Url'] = $value->coverImage->square3Url;
+        
+    }
+    $params['data'] = $instructable_arr;
+    cache_set('instructable_api_data', $instructable_arr);
+    }else 
+    {
+        $params['data']['error'] = 'No data available.';
+    }
+    $output = theme('intl_instructable_block', $params);
+
+  return $output;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function intel_instructable_theme() 
+{
+    $themes = array();
+    $themes['intl_instructable_block'] = array(
+      'variables' => array('params' => array()),
+      'template' => 'templates/intl-instructable-block',
+    );
+    return $themes;
+}
+
+function sort_arr_of_obj($array, $sortby, $direction='asc') {
+
+    $sortedArr = array();
+    $tmp_Array = array();
+
+    foreach($array as $k => $v) {
+        $tmp_Array[] = strtolower($v->$sortby);
+    }
+
+    if($direction=='asc'){
+        asort($tmp_Array);
+    }else{
+        arsort($tmp_Array);
+    }
+
+    foreach($tmp_Array as $k=>$tmp){
+        $sortedArr[] = $array[$k];
+    }
+
+    return $sortedArr;
+
+}
+
+function intel_instructable_cron() {
+    $cached_data = cache_get('instructable_api_data');
+       $cron_last_run = variable_get('instructable_last_run');
+       $cur_time = $_SERVER['REQUEST_TIME'];
+       $tm_diff = $cur_time - $cron_last_run;
+       $tm_diff_inhours = round($tm_diff/3600);
+       $last_run = variable_get('instructable_cron_interval');
+       if($tm_diff_inhours > $last_run) {
+           cache_clear_all('instructable_cron_interval');
+            variable_set('instructable_last_run', $_SERVER['REQUEST_TIME']);
+       }
+}

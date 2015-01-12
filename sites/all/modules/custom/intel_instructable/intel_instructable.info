@@ -1,0 +1,5 @@
+name = IDZ instructable block
+description = IDZ instructable block
+core = 7.x
+version = VERSION
+package = intel
