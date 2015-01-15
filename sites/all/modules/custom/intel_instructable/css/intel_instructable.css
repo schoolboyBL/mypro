@@ -1,0 +1,194 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 12 Jan, 2015, 6:27:49 PM
+    Author     : smita
+*/
+.mosiacGrid:after {
+    content: '.';
+}
+.mosiacGrid .grid{
+    float:left;
+    width:126px;
+    height:126px;
+
+}
+.mosiacGrid .grid.smallRectGrid{
+    width:63px;
+    height:126px;
+}
+.grid img.outerImg{
+    width:100%;
+}
+.gridColumn{
+    position:relative;
+    cursor: pointer;
+    width:100%;
+    height:100%;
+}
+.smallSquareGrid .gridColumn{
+    float:left;
+    width:50%;
+    height: 50%;
+}
+.smallRectGrid .gridColumn{
+    height:50%;
+}
+.mosiacGrid .clickedInfo{
+    display:none;
+    border:1px solid white;
+    box-sizing: border-box;
+}
+.mosiacClearfix{
+    clear:left;
+    height:0px;
+}
+.mosiacGrid .showZoomedInfo .clickedInfo{
+    display:block;
+    position:absolute;
+    top:0;
+    left:0;
+    z-index:1;
+    width:200px;
+    height:200px;    
+}
+.mosiacGrid .showZoomedInfo .outerImg{
+    /*display:none;*/
+}
+.mosiacGrid .post_info{
+    color:white;
+    padding:10px;
+    position: relative;
+    z-index: 2;
+    background-color: rgba(0,0,0,0.5);
+}
+.mosiacGrid .clickedInfo img { 
+    position: absolute; 
+    top: 0; 
+    z-index: 1;
+}
+.mosiacGrid .post_info h5, .mosiacGrid .post_info .instruct_username {
+    margin:0;
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #fff;
+    line-height: 1.2em;
+}
+.mosiacGrid .post_info span {
+    font-weight: normal;
+}
+.mosiacGrid .post_info .instruct_username{
+    margin-top:5px;
+    margin-bottom: 0;
+}
+.mosiacGrid .lastColumn .showZoomedInfo .clickedInfo{
+    right:0px;
+    left:inherit !important;
+}
+.mosiacGrid .row_2 .showZoomedInfo .clickedInfo{
+    bottom: 0px;
+    top:inherit !important;
+}
+.instructable_text{
+    clear:both;
+}
+.pane-iot-home-get-inspired .bean-text{
+    padding-top: 15px;
+    clear: both;
+}
+.pane-iot-home-get-inspired .pane-title {
+    width:50%;
+    float:left;
+    text-align: left;
+}
+.pane-iot-home-get-inspired .instructable-logo{
+    text-align: right;
+    margin-top: -80px;
+    padding-bottom: 10px;
+}
+
+.pane-iot-home-get-inspired .instructable-logo p {
+    margin: 0px;
+}
+@media (max-width: 800px){
+    .mosiacGrid .grid {
+        width: 100px;
+        height: 100px;
+    }
+    .mosiacGrid .grid.smallRectGrid {
+        width: 50px;
+        height: 100px;
+    }
+    .mosiacGrid .showZoomedInfo .clickedInfo {
+        width: 150px;
+        height: 150px;
+    }
+    .mosiacGrid .post_info h5, .mosiacGrid .post_info .instruct_username {
+        font-size: 1em;
+        line-height: 1.2em;
+    }
+    .mosiacGrid .row_2 .showZoomedInfo .clickedInfo {
+        left: -40px;
+    }
+}
+@media (max-width: 640px){
+    .mosiacGrid .grid {
+        width: 82px;
+        height: 82px;
+    }
+    .mosiacGrid .grid.smallRectGrid {
+        width: 41px;
+        height: 82px;
+    }
+}
+@media (max-width: 480px){
+    .mosiacGrid .grid {
+        width: 120px;
+        height: 120px;
+    }
+    .mosiacGrid .grid.smallRectGrid {
+        width: 60px;
+        height: 120px;
+    }
+    .pane-iot-home-get-inspired .instructable-logo{
+        margin-top: 0px;
+    }
+}
+@media (max-width: 401px){
+    .pane-iot-home-get-inspired .pane-title {
+        float: none;
+        width: 100%;
+    }
+   .mosiacGrid .grid {
+        width: 84px;
+        height: 84px;
+    }
+    .mosiacGrid .grid.smallRectGrid {
+        width: 42px;
+        height: 84px;
+    }
+    .mosiacGrid .showZoomedInfo .clickedInfo {
+        width: 120px;
+        height: 120px;
+    }
+    .mosiacGrid .post_info h5, .mosiacGrid .post_info .instruct_username {
+        font-size: 0.9em;
+        line-height: 1.1em;
+    }
+    .mosiacGrid .row_2 .showZoomedInfo .clickedInfo {
+        left: 0;
+    }
+}
+@media (max-width: 320px){
+    .mosiacGrid .grid {
+        width: 72px;
+        height: 72px;
+    }
+    .mosiacGrid .grid.smallRectGrid {
+        width: 36px;
+        height: 72px;
+    }
+}

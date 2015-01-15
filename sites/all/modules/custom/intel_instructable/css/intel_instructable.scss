@@ -1,0 +1,95 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 12 Jan, 2015, 5:34:54 PM
+    Author     : smita
+*/
+#intel-instructable-block{
+    max-width:424px;
+    .mosiacGrid{
+    .grid{
+    float:left;
+    width:120px;
+    height:120px;
+    
+    }
+.mosiacGrid .grid.smallRectGrid{
+    width:60px;
+    height:120px;
+}
+.grid img.outerImg{
+    width:100%;
+}
+.gridColumn{
+    position:relative;
+    cursor: pointer;
+    width:100%;
+    height:100%;
+}
+.smallSquareGrid .gridColumn{
+    float:left;
+    width:50%;
+    height: 50%;
+}
+.smallRectGrid .gridColumn{
+    height:50%;
+}
+.mosiacGrid .clickedInfo{
+        display:none;
+        border:1px solid white;
+        box-sizing: border-box;
+ }
+ .mosiacClearfix{
+     clear:left;
+     height:0px;
+ }
+.mosiacGrid .showZoomedInfo .clickedInfo{
+     display:block;
+     position:absolute;
+     top:0;
+     left:0;
+     z-index:1;
+     width:200px;
+     height:200px;
+}
+.mosiacGrid .showZoomedInfo .outerImg{
+    /*display:none;*/
+}
+.mosiacGrid .post_info{
+    position: absolute;
+    color:white;
+    padding:10px;
+    width: 100%;
+    background-color: rgba(0,0,0,0.3);
+    box-sizing: border-box;
+}
+.mosiacGrid .post_info h5{
+    margin:0;
+    font-weight: bold;
+}
+.mosiacGrid .post_info .instruct_username{
+    margin-top:5px;
+    margin-bottom: 0;
+}
+.mosiacGrid .lastColumn .showZoomedInfo .clickedInfo{
+    right:0px;
+    left:inherit !important;
+}
+.mosiacGrid .row_2 .showZoomedInfo .clickedInfo{
+    bottom: 0px;
+    top:inherit !important;
+}
+
+}
+.instructable_text{
+    clear:both;
+}
+}
+
+
+
+
+
