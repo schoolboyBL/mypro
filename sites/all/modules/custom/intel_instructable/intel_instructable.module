@@ -1,29 +1,32 @@
 <?php
 
-function intel_instructable_block_info() 
-{
+/*
+ * Implementatio of hook_block_info
+ */
+function intel_instructable_block_info() {
   $blocks = array();
   $blocks['instrutableinfo'] = array(
     'info' => t('intel instructable'),
   );
   return $blocks;
 }
-
-function intel_instructable_block_view($delta = '')
-{
+/*
+ * Implementation of hook_block_view
+ */
+function intel_instructable_block_view($delta = '') {
   if($delta == 'instrutableinfo')
   {
     $module_path = drupal_get_path('module', 'intel_instructable');
     $block = array
     (
-    'subject' => t('Intel Instructable'),
+    'subject' => '',
       'content' => array
       (
         '#markup' => _intel_instructable_block_content(),
         '#attached' => array
         (
-           'css' => array($module_path.'/css/instructable.css'),
-           'js' => array($module_path.'/css/instructable.js'),
+           'css' => array($module_path.'/css/intel_instructable.css'),
+           'js' => array($module_path.'/js/intel_instructable.js'),
         ),
       ),
     );
@@ -31,24 +34,31 @@ function intel_instructable_block_view($delta = '')
   }
 }
 
-function intel_instructable_block_configure($delta = '') 
-{
+/**
+ * Implementation of hook_block_configure
+ */
+function intel_instructable_block_configure($delta = '') {
   $form = array();
   if ($delta == 'instrutableinfo') {
+    $form['instructable_title'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Instructable Title'),
+      '#default_value' => variable_get('instructable_title', t('Share your inspiration')),
+    );
     $form['instructable_description'] = array(
       '#type' => 'textarea',
       '#title' => t('Description'),
-      '#default_value' => variable_get('instructable_description', ''),
+      '#default_value' => variable_get('instructable_description', t('Your fellow makers have been busy creating amazing projects. See how they made it happen and share your progress!')),
     );
     $form['instructable_link_label'] = array(
       '#type' => 'textfield',
       '#title' => t('Link (Label)'),
-      '#default_value' => variable_get('instructable_link_label', ''),
+      '#default_value' => variable_get('instructable_link_label', t('Visit Intel IoT at Instructables* ›')),
     );
     $form['instructable_link_value'] = array(
       '#type' => 'textfield',
       '#title' => t('Link (Value)'),
-      '#default_value' => variable_get('instructable_link_value', ''),
+      '#default_value' => variable_get('instructable_link_value', 'http://www.instructables.com/id/Intel/'),
     );
     $form['instructable_cron_interval'] = array(
       '#type' => 'select',
@@ -60,9 +70,12 @@ function intel_instructable_block_configure($delta = '')
   return $form;
 }
 
-function intel_instructable_block_save($delta = '', $edit = array()) 
-{
+/**
+ * Implementation of hok_block_save
+ */
+function intel_instructable_block_save($delta = '', $edit = array()) {
   if ($delta == 'instrutableinfo') {
+    variable_set('instructable_title', $edit['instructable_title']);
     variable_set('instructable_description', $edit['instructable_description']);
     variable_set('instructable_link_label', $edit['instructable_link_label']);
     variable_set('instructable_link_value', $edit['instructable_link_value']);
@@ -70,51 +83,64 @@ function intel_instructable_block_save($delta = '', $edit = array())
   }
 }
 
-function _intel_instructable_block_content() 
-{
+/**
+ * Declaration of function _intel_instructable_block_content
+ */
+function _intel_instructable_block_content() {
+    global $base_url;
     $params = array();
+    $params['instructagle_logo_url'] = $base_url.'/'.drupal_get_path('module', 'intel_instructable') . '/images/powered_by-instructables.png';
     $instructable_arr = array();
-    
-    $url = 'http://www.instructables.com/json-api/showInstructable?id=intel';
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($curl, CURLOPT_HEADER, false);
-    $data = curl_exec($curl);
-    curl_close($curl);
-    $data = json_decode($data);
-    if(!empty($data)) {
-    $instructable_data = $data->instructables;
-    $instructable_sorted_data = sort_arr_of_obj($instructable_data, 'favorites', 'desc');
-    foreach($instructable_sorted_data as $key => $value) {
-        if($key === 20) 
-        {
-            break;
+    $cached_data = cache_get('instructable_api_data'); 
+    if(!empty($cached_data->data)) {
+        $params['data'] = $cached_data->data;
+    }else {
+        $url = 'http://www.instructables.com/json-api/showInstructable?id=intel';
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_HEADER, false);
+        $response = curl_exec($curl) ;
+        if($response === false) {
+            $params['error'] = curl_error($curl);
+        }else {
+            $data = json_decode($response);
         }
-        $instructable_arr[$key]['title'] = $value->title;
-        $instructable_arr[$key]['author_screenname'] = $value->author->screenName;
-        $instructable_arr[$key]['cover_image_squareUrl'] = $value->coverImage->squareUrl;
-        $instructable_arr[$key]['cover_image_square2Url'] = $value->coverImage->square2Url;
-        $instructable_arr[$key]['cover_image_square3Url'] = $value->coverImage->square3Url;
+        curl_close($curl);
         
+        if(!empty($data)) {
+            $instructable_data = $data->instructables;
+            $instructable_sorted_data = sort_arr_of_obj($instructable_data, 'favorites', 'desc');
+            foreach($instructable_sorted_data as $key => $value) {
+                if($key === 20) {
+                    break;
+                }
+                $instructable_arr[$key]['title'] = $value->title;
+                $instructable_arr[$key]['author_screenname'] = $value->author->screenName;
+                $instructable_arr[$key]['cover_image_squareUrl'] = $value->coverImage->squareUrl;
+                $instructable_arr[$key]['cover_image_square2Url'] = $value->coverImage->square2Url;
+                $instructable_arr[$key]['cover_image_square3Url'] = $value->coverImage->square3Url;
+            }
+            $params['data'] = $instructable_arr;
+            cache_set('instructable_api_data', $instructable_arr);
+        }else {
+            watchdog('intel_instructable', 'Unable to get data from api. Contact your site administrator.');
+        }
     }
-    $params['data'] = $instructable_arr;
-    cache_set('instructable_api_data', $instructable_arr);
-    }else 
-    {
-        $params['data']['error'] = 'No data available.';
-    }
+    //$params['iconPath']=drupal_get_path('module', 'intel_instructable').'/images/powered_by-instructables.png';
+    //$params['iconPath']='http://localhost/idz/www/sites/all/modules/custom/intel_instructable/images/powered_by-instructables.png';
+    $params['bottomTextTitle']=variable_get('instructable_title', t('Share your inspiration'));
+    $params['bottomText']=variable_get('instructable_description', t('Your fellow makers have been busy creating amazing projects. See how they made it happen and share your progress!'));
+    $params['bottomTextLink']=l(variable_get('instructable_link_label', t('Visit Intel IoT at Instructables* ›')),variable_get('instructable_link_value', 'http://www.instructables.com/id/Intel/') , array('attributes'=>array('target'=>'_blank')));
     $output = theme('intl_instructable_block', $params);
-
-  return $output;
+    return $output;
 }
 
 /**
  * Implements hook_theme().
  */
-function intel_instructable_theme() 
-{
+function intel_instructable_theme() {
     $themes = array();
     $themes['intl_instructable_block'] = array(
       'variables' => array('params' => array()),
@@ -146,6 +172,9 @@ function sort_arr_of_obj($array, $sortby, $direction='asc') {
 
 }
 
+/**
+ * Implementation of hook_cron
+ */
 function intel_instructable_cron() {
     $cached_data = cache_get('instructable_api_data');
        $cron_last_run = variable_get('instructable_last_run');

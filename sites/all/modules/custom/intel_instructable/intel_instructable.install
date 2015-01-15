@@ -1,0 +1,13 @@
+<?php
+/**
+ * Implements hook_uninstall()
+ */
+function intel_instructable_uninstall() {
+  variable_del('instructable_title');
+  variable_del('instructable_description');
+  variable_del('instructable_link_label');
+  variable_del('instructable_link_value');
+  variable_del('instructable_cron_interval');
+  cache_clear_all('instructable_cron_interval');
+  cache_clear_all('instructable_api_data');
+}
